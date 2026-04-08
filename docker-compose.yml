@@ -1,0 +1,29 @@
+services:
+  bridge:
+    build: .
+    container_name: discord-claude-bridge
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - WORKSPACE_PATH=/workspace
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_TOKEN}
+    volumes:
+      # Host projects directory -> container workspace (CHANGE THIS to your path)
+      - /path/to/your/projects:/workspace
+      # Host ~/.claude -> accessible for "claude-root" channel (optional)
+      - ~/.claude:/claude-home
+      # Persist bridge config and sessions across restarts
+      - bridge-data:/home/claude/.bridge
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bridge-data:
