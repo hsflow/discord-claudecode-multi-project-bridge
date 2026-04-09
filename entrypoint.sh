@@ -13,6 +13,13 @@ if [ -d /workspace ] && [ "$(id -u)" = "0" ]; then
     chown -R claude:claude /home/claude /app 2>/dev/null || true
   fi
 
+  # Link /claude-home to /home/claude/.claude so Claude CLI picks up
+  # global settings, skills, and CLAUDE.md from the mounted volume
+  if [ -d /claude-home ]; then
+    ln -sfn /claude-home /home/claude/.claude
+    chown -h claude:claude /home/claude/.claude
+  fi
+
   exec gosu claude node dist/main.js
 else
   exec node dist/main.js
