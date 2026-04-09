@@ -48,7 +48,7 @@ Discord カテゴリ「Code Projects」
 ### 1. リポジトリをクローン
 
 ```bash
-git clone https://github.com/<your-username>/discord-claudecode-multi-project-bridge.git
+git clone https://github.com/hsflow/discord-claudecode-multi-project-bridge.git
 cd discord-claudecode-multi-project-bridge
 ```
 
