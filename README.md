@@ -24,16 +24,15 @@ Discord カテゴリ「Code Projects」
   ┌─────────────────────────────────┐
   │  Docker Container               │
   │                                 │
-  │  Channel Watcher (Client #1)    │
-  │    → CHANNEL_CREATE検知         │
-  │    → ディレクトリ自動作成        │
-  │    → config.json更新            │
-  │                                 │
-  │  Message Handler (Client #2)    │
-  │    → メッセージ受信              │
-  │    → claude --print 実行        │
-  │    → 進捗をスレッドに投稿       │
-  │    → 結果をチャンネルに返信     │
+  │  Discord Client (単一)          │
+  │    ├─ CHANNEL_CREATE検知        │
+  │    │    → ディレクトリ自動作成   │
+  │    │    → config.json更新       │
+  │    │                            │
+  │    └─ MESSAGE_CREATE検知        │
+  │         → claude --print 実行   │
+  │         → 進捗をスレッドに投稿  │
+  │         → 結果をチャンネルに返信│
   └─────────────────────────────────┘
 ```
 
@@ -125,7 +124,7 @@ volumes:
   # ↓ プロジェクトを配置する親ディレクトリに変更
   - /path/to/your/projects:/workspace
   # ↓ Claude Codeのグローバル設定（claude-rootチャンネル用、不要なら削除可）
-  - /path/to/your/.claude:/claude-home
+  - ~/.claude:/claude-home
 ```
 
 ### 8. ビルド & 起動
