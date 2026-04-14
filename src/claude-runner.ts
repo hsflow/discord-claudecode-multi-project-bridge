@@ -28,6 +28,20 @@ function persistSessions(): void {
 
 const sessions: Map<string, SessionInfo> = loadSessions();
 
+const activeRuns: Set<Promise<unknown>> = new Set();
+
+export function waitForActiveRuns(timeoutMs = 30_000): Promise<void> {
+  if (activeRuns.size === 0) return Promise.resolve();
+  console.log(`[claude-runner] Waiting for ${activeRuns.size} active run(s) to complete...`);
+  return Promise.race([
+    Promise.allSettled([...activeRuns]),
+    new Promise<void>((resolve) => setTimeout(() => {
+      console.log('[claude-runner] Graceful shutdown timeout reached, forcing exit');
+      resolve();
+    }, timeoutMs)),
+  ]).then(() => undefined);
+}
+
 // Allowlisted env vars passed to Claude CLI (prevent leaking DISCORD_BOT_TOKEN etc.)
 const ALLOWED_ENV_KEYS = [
   'PATH', 'HOME', 'USER', 'LANG', 'LC_ALL', 'TERM',
@@ -150,7 +164,7 @@ export async function runClaude(
   // "--" prevents prompt from being interpreted as a CLI flag
   args.push('--', prompt);
 
-  return new Promise((resolve, reject) => {
+  const run = new Promise<{ text: string; sessionId: string | null }>((resolve, reject) => {
     let settled = false;
 
     const settle = (fn: () => void) => {
@@ -264,4 +278,8 @@ export async function runClaude(
       settle(() => reject(new Error(`Failed to start Claude CLI: ${err.message}`)));
     });
   });
+
+  activeRuns.add(run);
+  run.finally(() => activeRuns.delete(run));
+  return run;
 }

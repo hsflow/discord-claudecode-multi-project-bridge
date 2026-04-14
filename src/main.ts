@@ -4,7 +4,7 @@ import path from 'node:path';
 import { loadConfig } from './env.js';
 import { ConfigManager } from './config-manager.js';
 import { setupChannelWatcher } from './channel-watcher.js';
-import { cleanupStaleSessions } from './claude-runner.js';
+import { cleanupStaleSessions, waitForActiveRuns } from './claude-runner.js';
 import { handleMessage } from './message-handler.js';
 
 async function main() {
@@ -51,8 +51,12 @@ async function main() {
   await client.login(config.discordBotToken);
   console.log('[main] Bridge is running.');
 
+  let shuttingDown = false;
   const shutdown = async () => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     console.log('[main] Shutting down...');
+    await waitForActiveRuns(30_000);
     client.destroy();
     process.exit(0);
   };
