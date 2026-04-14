@@ -142,6 +142,9 @@ export async function runClaude(
 
   if (session?.sessionId) {
     args.push('--resume', session.sessionId);
+    console.log(`[claude-runner] Resuming session ${session.sessionId} for ${sessionKey}`);
+  } else {
+    console.log(`[claude-runner] Starting new session for ${sessionKey}`);
   }
 
   // "--" prevents prompt from being interpreted as a CLI flag
@@ -235,6 +238,9 @@ export async function runClaude(
       }
 
       if (resultSessionId) {
+        if (session?.sessionId && resultSessionId !== session.sessionId) {
+          console.log(`[claude-runner] Session ID changed: ${session.sessionId} -> ${resultSessionId} (resume may have failed silently)`);
+        }
         sessions.set(sessionKey, {
           sessionId: resultSessionId,
           threadId: sessionKey,
