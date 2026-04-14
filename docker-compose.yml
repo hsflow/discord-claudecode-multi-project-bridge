@@ -7,11 +7,12 @@ services:
     environment:
       - WORKSPACE_PATH=/workspace
       - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
     volumes:
       # Host projects directory -> container workspace (CHANGE THIS to your path)
       - /path/to/your/projects:/workspace
-      # Host ~/.claude -> accessible for "claude-root" channel (optional)
-      - ~/.claude:/claude-home
+      # Host ~/.claude -> mounted as claude user's home config (CLAUDE.md, skills, settings.json etc.)
+      - ~/.claude:/home/claude/.claude
       # Persist bridge config and sessions across restarts
       - bridge-data:/home/claude/.bridge
     deploy:
