@@ -7,8 +7,11 @@ const SESSIONS_PATH = join(process.env.BRIDGE_HOME ?? '/tmp', 'sessions.json');
 
 function loadSessions(): Map<string, SessionInfo> {
   try {
-    const raw = JSON.parse(readFileSync(SESSIONS_PATH, 'utf-8'));
-    return new Map(Object.entries(raw));
+    const raw = JSON.parse(readFileSync(SESSIONS_PATH, 'utf-8')) as Record<string, SessionInfo>;
+    const now = Date.now();
+    return new Map(
+      Object.entries(raw).map(([k, v]) => [k, { ...v, lastActivity: now }]),
+    );
   } catch {
     return new Map();
   }
