@@ -1,7 +1,29 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { SessionInfo } from './types.js';
 
-const sessions: Map<string, SessionInfo> = new Map();
+const SESSIONS_PATH = join(process.env.BRIDGE_HOME ?? '/tmp', 'sessions.json');
+
+function loadSessions(): Map<string, SessionInfo> {
+  try {
+    const raw = JSON.parse(readFileSync(SESSIONS_PATH, 'utf-8'));
+    return new Map(Object.entries(raw));
+  } catch {
+    return new Map();
+  }
+}
+
+function persistSessions(): void {
+  try {
+    const obj = Object.fromEntries(sessions);
+    writeFileSync(SESSIONS_PATH, JSON.stringify(obj, null, 2) + '\n');
+  } catch (err) {
+    console.error('[claude-runner] Failed to persist sessions:', err);
+  }
+}
+
+const sessions: Map<string, SessionInfo> = loadSessions();
 
 // Allowlisted env vars passed to Claude CLI (prevent leaking DISCORD_BOT_TOKEN etc.)
 const ALLOWED_ENV_KEYS = [
@@ -29,6 +51,7 @@ export function cleanupStaleSessions(maxAgeMs: number): void {
   }
   if (cleaned > 0) {
     console.log(`[claude-runner] Cleaned up ${cleaned} stale sessions`);
+    persistSessions();
   }
 }
 
@@ -197,6 +220,7 @@ export async function runClaude(
         if (session?.sessionId && !settled) {
           console.log(`[claude-runner] Session ${session.sessionId} failed, retrying fresh`);
           sessions.delete(sessionKey);
+          persistSessions();
           runClaude({ ...options }).then(
             (r) => settle(() => resolve(r)),
             (e) => settle(() => reject(e)),
@@ -214,6 +238,7 @@ export async function runClaude(
           projectDir,
           lastActivity: Date.now(),
         });
+        persistSessions();
       }
 
       settle(() => {
