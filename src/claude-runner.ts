@@ -29,7 +29,7 @@ const sessions: Map<string, SessionInfo> = loadSessions();
 const ALLOWED_ENV_KEYS = [
   'PATH', 'HOME', 'USER', 'LANG', 'LC_ALL', 'TERM',
   'CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY',
-  'NODE_ENV',
+  'GITHUB_TOKEN', 'NODE_ENV',
 ];
 
 function buildChildEnv(): Record<string, string> {
