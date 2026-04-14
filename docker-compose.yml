@@ -7,7 +7,7 @@ services:
     environment:
       - WORKSPACE_PATH=/workspace
       - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_TOKEN}
-      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     volumes:
       # Host projects directory -> container workspace (CHANGE THIS to your path)
       - /path/to/your/projects:/workspace
